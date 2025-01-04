@@ -29,7 +29,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="container mx-auto px-4 py-4">
           {/* Desktop Header */}
           <div className="hidden md:flex items-center justify-between">
-            <h1 className="text-2xl font-bold">NotesFlow</h1>
+            <h1 className="text-2xl font-bold">QuillTrack</h1>
             <div className="flex items-center gap-4">
               <GoogleSyncButton className="hidden md:flex" />
               <SyncStatus />
@@ -58,7 +58,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
           {/* Mobile Header */}
           <div className="md:hidden flex items-center justify-between">
-            <h1 className="text-xl font-bold">NotesFlow</h1>
+            <h1 className="text-xl font-bold">QuillTrack</h1>
             <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon">

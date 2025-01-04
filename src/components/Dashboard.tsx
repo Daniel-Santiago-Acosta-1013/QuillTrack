@@ -10,7 +10,7 @@ import { TaskDialog } from '@/components/dialogs/TaskDialog';
 import { Note, Task } from '@/types';
 
 export function Dashboard() {
-  const { notes, tasks, updateNote, deleteNote, toggleTaskComplete, updateTask, deleteTask } = useStore();
+  const { notes, tasks, deleteNote, toggleTaskComplete, deleteTask } = useStore();
   const [noteDialogOpen, setNoteDialogOpen] = useState(false);
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | undefined>();

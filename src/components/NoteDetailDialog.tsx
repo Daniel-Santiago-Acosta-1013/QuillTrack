@@ -1,4 +1,3 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Note } from '@/types';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';

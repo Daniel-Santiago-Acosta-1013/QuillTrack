@@ -6,7 +6,7 @@ import { useStore } from '@/store/useStore';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Toaster } from '@/components/ui/toaster';
 
-const GOOGLE_CLIENT_ID = '308332127351-2mn2le18or5ia36gmt5102a8s3h981m2.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || '';
 
 function App() {
   const user = useStore((state) => state.user);

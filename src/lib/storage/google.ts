@@ -1,5 +1,3 @@
-import { Note, Task } from '@/types';
-
 export interface SyncStatus {
   lastSync: Date | null;
   isSyncing: boolean;

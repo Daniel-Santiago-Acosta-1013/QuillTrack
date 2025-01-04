@@ -1,7 +1,7 @@
 import { useStore } from '@/store/useStore';
 import { Button } from '@/components/ui/button';
 import { LoginButton } from '@/components/auth/LoginButton';
-import { FileText, Save } from 'lucide-react';
+import { Save } from 'lucide-react';
 
 export function WelcomePage() {
   const setUser = useStore((state) => state.setUser);
@@ -14,7 +14,7 @@ export function WelcomePage() {
     <div className="min-h-screen bg-background flex items-center justify-center">
       <div className="max-w-md w-full space-y-8 p-8">
         <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold tracking-tight">Welcome to NotesFlow</h1>
+          <h1 className="text-4xl font-bold tracking-tight">Welcome to QuillTrack</h1>
           <p className="text-muted-foreground">
             Choose how you want to store your notes and tasks
           </p>
