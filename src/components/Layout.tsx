@@ -8,10 +8,11 @@ import { GoogleSyncButton } from '@/components/GoogleSyncButton';
 import { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
+import { WelcomePage } from '@/components/WelcomePage';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { theme, setTheme } = useTheme();
-  const user = useStore((state) => state.user);
+  const { user, logout } = useStore();
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -22,6 +23,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
   if (!mounted) {
     return null;
   }
+
+  if (!user) {
+    return <WelcomePage />;
+  }
+
+  const handleLogout = async () => {
+    logout(); 
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -42,16 +51,26 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <MoonIcon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
                 <span className="sr-only">Toggle theme</span>
               </Button>
+
               {user && (
-                <Avatar>
-                  <AvatarImage src={user.picture} alt={user.name} />
-                  <AvatarFallback>
-                    {user.name
-                      .split(' ')
-                      .map((n) => n[0])
-                      .join('')}
-                  </AvatarFallback>
-                </Avatar>
+                <>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </Button>
+                  <Avatar>
+                    <AvatarImage src={user.picture} alt={user.name} />
+                    <AvatarFallback>
+                      {user.name
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')}
+                    </AvatarFallback>
+                  </Avatar>
+                </>
               )}
             </div>
           </div>
@@ -91,18 +110,27 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     )}
                   </Button>
                   {user && (
-                    <div className="flex items-center gap-3 px-3">
-                      <Avatar>
-                        <AvatarImage src={user.picture} alt={user.name} />
-                        <AvatarFallback>
-                          {user.name
-                            .split(' ')
-                            .map((n) => n[0])
-                            .join('')}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="font-medium">{user.name}</span>
-                    </div>
+                    <>
+                      <div className="flex items-center gap-3 px-3">
+                        <Avatar>
+                          <AvatarImage src={user.picture} alt={user.name} />
+                          <AvatarFallback>
+                            {user.name
+                              .split(' ')
+                              .map((n) => n[0])
+                              .join('')}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium">{user.name}</span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        className="justify-start w-full"
+                        onClick={handleLogout}
+                      >
+                        Logout
+                      </Button>
+                    </>
                   )}
                 </div>
               </SheetContent>

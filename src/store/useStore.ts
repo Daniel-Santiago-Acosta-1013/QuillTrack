@@ -11,19 +11,22 @@ interface Store {
   syncEnabled: boolean;
   lastSync: Date | null;
   isSyncing: boolean;
-  
+
   setUser: (user: User | null) => void;
   enableSync: (accessToken: string) => Promise<void>;
   disableSync: () => void;
-  
+
   addNote: (note: Note) => void;
   updateNote: (id: string, note: Partial<Note>) => void;
   deleteNote: (id: string) => void;
-  
+
   addTask: (task: Task) => void;
   updateTask: (id: string, task: Partial<Task>) => void;
   deleteTask: (id: string) => void;
   toggleTaskComplete: (id: string) => void;
+
+  // Nueva función para cerrar sesión completamente
+  logout: () => void;
 }
 
 export const useStore = create<Store>()(
@@ -41,7 +44,38 @@ export const useStore = create<Store>()(
       enableSync: async (accessToken) => {
         try {
           set({ isSyncing: true });
-          await googleDriveSync.init(accessToken);
+
+          // Obtener información del usuario desde Google
+          const userInfo = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }).then((res) => res.json());
+
+          // Actualizar el usuario en el store
+          set({
+            user: {
+              id: userInfo.sub,
+              name: userInfo.name,
+              email: userInfo.email,
+              picture: userInfo.picture,
+            },
+          });
+
+          // Inicializar la sincronización de Google Drive (leer y/o crear archivo en Drive)
+          // Retorna las notas y tareas que encuentre en Drive (si existen)
+          const driveData = await googleDriveSync.init(accessToken);
+
+          // Si se encontró data en Drive, actualizamos el store con ella
+          if (driveData) {
+            set({ notes: driveData.notes, tasks: driveData.tasks });
+            localStore.saveNotes(driveData.notes);
+            localStore.saveTasks(driveData.tasks);
+          }
+
+          // Referencia al store para que googleDriveSync pueda leer y subir datos periódicamente
+          googleDriveSync.setStoreRef(() => get());
+
           set({ syncEnabled: true, isSyncing: false, lastSync: new Date() });
         } catch (error) {
           set({ isSyncing: false });
@@ -61,7 +95,7 @@ export const useStore = create<Store>()(
       },
 
       updateNote: (id, noteUpdate) => {
-        const notes = get().notes.map((n) => 
+        const notes = get().notes.map((n) =>
           n.id === id ? { ...n, ...noteUpdate } : n
         );
         set({ notes });
@@ -81,7 +115,7 @@ export const useStore = create<Store>()(
       },
 
       updateTask: (id, taskUpdate) => {
-        const tasks = get().tasks.map((t) => 
+        const tasks = get().tasks.map((t) =>
           t.id === id ? { ...t, ...taskUpdate } : t
         );
         set({ tasks });
@@ -100,6 +134,21 @@ export const useStore = create<Store>()(
         );
         set({ tasks });
         localStore.saveTasks(tasks);
+      },
+
+      logout: () => {
+        googleDriveSync.stop();
+        localStorage.clear();
+
+        // Restablecer el estado
+        set({
+          user: null,
+          notes: [],
+          tasks: [],
+          syncEnabled: false,
+          lastSync: null,
+          isSyncing: false,
+        });
       },
     }),
     {
