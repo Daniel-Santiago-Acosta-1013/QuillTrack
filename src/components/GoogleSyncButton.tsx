@@ -12,6 +12,9 @@ export function GoogleSyncButton({ variant = 'outline', className }: GoogleSyncB
   const { enableSync, syncEnabled } = useStore();
 
   const login = useGoogleLogin({
+    scope: 'openid email profile https://www.googleapis.com/auth/drive',
+    prompt: 'consent',
+    include_granted_scopes: true,
     onSuccess: async (response) => {
       try {
         await enableSync(response.access_token);
@@ -19,12 +22,15 @@ export function GoogleSyncButton({ variant = 'outline', className }: GoogleSyncB
         console.error('Sync failed:', error);
       }
     },
+    onError: (errorResponse) => {
+      console.error('Login failed:', errorResponse);
+    },
   });
 
   if (syncEnabled) return null;
 
   return (
-    <Button 
+    <Button
       variant={variant}
       onClick={() => login()}
       className={className}

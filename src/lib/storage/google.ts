@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { Note, Task } from '@/types';
 
 const FOLDER_NAME = 'QuillTrack';
@@ -98,10 +99,11 @@ class GoogleDriveSync {
   private async findFolderByName(name: string): Promise<string | null> {
     const query = encodeURIComponent(`name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
     const url = `https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name)`;
-    const res = await fetch(url, {
+
+    const res = await axios.get(url, {
       headers: { Authorization: `Bearer ${this.accessToken}` },
     });
-    const data = await res.json();
+    const data = res.data;
 
     if (data.files && data.files.length > 0) {
       return data.files[0].id;
@@ -118,15 +120,14 @@ class GoogleDriveSync {
       name,
       mimeType: 'application/vnd.google-apps.folder',
     };
-    const res = await fetch(url, {
-      method: 'POST',
+
+    const res = await axios.post(url, body, {
       headers: {
         Authorization: `Bearer ${this.accessToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(body),
     });
-    const data = await res.json();
+    const data = res.data;
     return data.id;
   }
 
@@ -148,10 +149,11 @@ class GoogleDriveSync {
   private async findFileByName(name: string, folderId: string): Promise<string | null> {
     const query = encodeURIComponent(`name='${name}' and '${folderId}' in parents and trashed=false`);
     const url = `https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name)`;
-    const res = await fetch(url, {
+
+    const res = await axios.get(url, {
       headers: { Authorization: `Bearer ${this.accessToken}` },
     });
-    const data = await res.json();
+    const data = res.data;
 
     if (data.files && data.files.length > 0) {
       return data.files[0].id;
@@ -186,18 +188,14 @@ class GoogleDriveSync {
       fileContent +
       closeDelimiter;
 
-    const res = await fetch(
-      'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${this.accessToken}`,
-          'Content-Type': `multipart/related; boundary=${boundary}`,
-        },
-        body,
-      }
-    );
-    const data = await res.json();
+    const url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+    const res = await axios.post(url, body, {
+      headers: {
+        Authorization: `Bearer ${this.accessToken}`,
+        'Content-Type': `multipart/related; boundary=${boundary}`,
+      },
+    });
+    const data = res.data;
     return data.id;
   }
 
@@ -205,28 +203,23 @@ class GoogleDriveSync {
    * Descarga y retorna el contenido JSON del archivo. Si no hay datos, retorna null.
    */
   private async loadData(fileId: string): Promise<{ notes: Note[]; tasks: Task[] } | null> {
-    // Descargamos el archivo
     const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
-    const res = await fetch(url, {
+    const res = await axios.get(url, {
       headers: { Authorization: `Bearer ${this.accessToken}` },
+      validateStatus: () => true,
     });
 
-    // Si el archivo está vacío o no se pudo leer, retornamos null
-    if (!res.ok) {
-      console.warn('No se pudo leer el archivo en Drive.');
+    if (res.status !== 200) {
+      console.warn('No se pudo leer el archivo en Drive. Status:', res.status);
       return null;
     }
 
     try {
-      const data = await res.json();
-      // Validar la estructura
+      const data = res.data;
       if (!data.notes || !data.tasks) {
         return null;
       }
-      return {
-        notes: data.notes,
-        tasks: data.tasks,
-      };
+      return { notes: data.notes, tasks: data.tasks };
     } catch (error) {
       console.warn('Archivo JSON inválido o vacío en Drive.');
       return null;
@@ -240,13 +233,11 @@ class GoogleDriveSync {
     const url = `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`;
     const body = JSON.stringify(dataObj);
 
-    await fetch(url, {
-      method: 'PATCH',
+    await axios.patch(url, body, {
       headers: {
         Authorization: `Bearer ${this.accessToken}`,
         'Content-Type': 'application/json',
       },
-      body,
     });
   }
 }
