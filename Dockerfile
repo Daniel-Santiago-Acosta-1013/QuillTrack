@@ -1,22 +1,18 @@
-FROM node:18
+FROM node:20
 
-# Establece el directorio de trabajo dentro del contenedor
+# Instala PM2 globalmente
+RUN npm install -g pm2
+
 WORKDIR /usr/src/app
 
-# Copia el package.json y package-lock.json para instalar dependencias primero (mejora la cacheabilidad)
 COPY package*.json ./
-
-# Instala las dependencias del proyecto
 RUN npm install
 
-# Copia el resto de los archivos del proyecto al contenedor
 COPY . .
-
-# Construye la aplicación para producción
 RUN npm run build
 
-# Expone el puerto configurado en vite.config.ts
+# Expone el puerto de Vite (asegúrate de que coincide con tu configuración)
 EXPOSE 4001
 
-# Define el comando por defecto para ejecutar el servidor en modo de previsualización
-CMD ["npm", "run", "preview", "--", "--host"]
+# Usa PM2 para ejecutar la aplicación en producción
+CMD ["pm2-runtime", "start", "npm", "--", "run", "preview", "--", "--host"]
