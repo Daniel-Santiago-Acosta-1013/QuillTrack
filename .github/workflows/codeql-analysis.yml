@@ -10,6 +10,10 @@ jobs:
   analyze:
     name: Analyze TypeScript with CodeQL
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write  # Permiso necesario para CodeQL v3
 
     steps:
     - name: Checkout code
@@ -18,24 +22,23 @@ jobs:
     - name: Install Node.js and dependencies
       uses: actions/setup-node@v3
       with:
-        node-version: '20' # Especifica tu versión de Node
+        node-version: '20'
         cache: 'npm'
         
     - name: Install dependencies
-      run: npm ci # Instalación limpia y precisa
+      run: npm ci
 
-    # Configuración específica para TypeScript
+    # Actualizado a CodeQL v3 y eliminada configuración inexistente
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
+      uses: github/codeql-action/init@v3
       with:
-        languages: 'javascript' # CodeQL usa JS para analizar TS
-        config-file: ./.github/codeql-config.yml
+        languages: 'javascript'
 
-    # Paso crítico para proyectos TS: Build para analizar código transpilado
     - name: Build project
       run: npm run build --if-present
 
+    # Actualizado a CodeQL v3
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+      uses: github/codeql-action/analyze@v3
       with:
-        category: '/language:typescript' # Metadata adicional
+        category: '/language:typescript'
