@@ -39,9 +39,9 @@ export function WelcomePage() {
           >
             <Save className="h-5 w-5" />
             <div className="text-left">
-              <div className="font-semibold">Continue with Local Storage</div>
+              <div className="font-semibold">Save Locally on This Device</div>
               <div className="text-xs text-muted-foreground">
-                Store data in your browser
+                Data saved only on this device
               </div>
             </div>
           </Button>
@@ -55,7 +55,7 @@ export function WelcomePage() {
         </div>
 
         <p className="text-xs text-center text-muted-foreground mt-8">
-          You can change your storage option later in settings
+          You can change your storage method later in settings
         </p>
       </div>
     </div>
